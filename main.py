@@ -12,7 +12,7 @@ import numpy as np
 
 import bingo_game as bg
 
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+# from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 
 def addPlayersNumbers(dataFrame):
