@@ -10,6 +10,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+import openpyxl
+
 import bingo_game as bg
 
 # from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
