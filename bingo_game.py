@@ -85,13 +85,12 @@ class BingoGame():
         #     self.addPath(buildBingoPath(startingRange, endRange,alreadyDrawn))
             
     def playGame(self, path):
-        # winner = None
         winningMove = np.inf
-        status = None
+        status = 'Init_String'
         for player in range(0, len(self.playerList)):
             playerName =  self.playerList[player].name
             potentialWinningMove = findWinningMove(path, self.playerList[player].bingoNumbersListOfLists)
-            status = playerName*(bool(potentialWinningMove < winningMove)) + "Draw"*bool((potentialWinningMove == winningMove))
+            status = playerName*(bool(potentialWinningMove < winningMove)) + "Draw"*bool((potentialWinningMove == winningMove)) + status*(bool(potentialWinningMove > winningMove)) 
             winningMove = min(winningMove, potentialWinningMove)
             
         self.gameCounter += 1
@@ -137,6 +136,63 @@ class BingoGame():
         outFrame = pd.concat([prependFrame, outFrame], axis=1)
             
         return outFrame
+
+
+def quantifyMonteCarloNoise(numberOfPaths, numberOfSimulation):
+    playerOneCard = [
+                    [1,2,3, 4,5],
+                    [6, 7, 8, 9, 11],
+                    [11, 12, 13, 14, 15],
+                    [16, 17, 18, 19, 20],
+                    [21, 22, 23, 24, 25]
+                    ]
+    playerTwoCard = [
+                    [26,27,28, 29,30],
+                    [31, 32, 33, 34, 35],
+                    [36, 37, 38, 39, 40],
+                    [41, 42, 43, 44, 45],
+                    [46, 47, 48, 49, 50]
+                    ]
+    
+    playerOne = Player('Player One')
+    
+    for seize in range(0,len(playerOneCard)):
+        playerOneCard.append([playerOneCard[0][seize],
+                             playerOneCard[1][seize],
+                             playerOneCard[2][seize],
+                             playerOneCard[3][seize],
+                             playerOneCard[4][seize]])
+    
+    
+    playerOne.bingoNumbersListOfLists = playerOneCard
+    playerTwo = Player('Player Two')
+    
+    for seize in range(0,len(playerTwoCard)):
+        playerTwoCard.append([playerTwoCard[0][seize],
+                             playerTwoCard[1][seize],
+                             playerTwoCard[2][seize],
+                             playerTwoCard[3][seize],
+                             playerTwoCard[4][seize]])
+        
+    playerTwo.bingoNumbersListOfLists = playerTwoCard
+    
+    
+    bingoExample = BingoGame('Im a bingo Game')
+    bingoExample.addPlayer(playerOne)
+    bingoExample.addPlayer(playerTwo)
+    
+    playerOneProbabilityList = []
+    averageEndingMoveList = []
+    
+    for i in range(0, numberOfSimulation):
+        bingoExample.generatePaths(0, 99, numberOfPaths)
+        bingoExample.playBulk()
+        playerOneProbabilityList.append(bingoExample.winnerList.count('Player One')/numberOfPaths)
+        averageEndingMoveList.append(sum(bingoExample.gameEndingMoveList)/numberOfPaths)
+        
+        
+    return playerOneProbabilityList, averageEndingMoveList
+        
 
                     
 
@@ -186,9 +242,14 @@ if __name__ == '__main__':
     
     bingoExample.playBulk()
     
-    # someExample = buildBingoPath(0,99,[8])
-    # print(someExample)
-    # random.shuffle(someExample)
-    # print(someExample)
-    # someExample = buildMultiplePaths(0,99,10, [8])
-    
+    if False:    
+        hundredPaths =  quantifyMonteCarloNoise(100, 100)
+        pd.DataFrame(hundredPaths).to_excel(r'C:\Users\yvesw\Codes\Web_GUI\100_100_paths.xlsx')
+        thousandPaths =  quantifyMonteCarloNoise(1000, 100)
+        pd.DataFrame(thousandPaths).to_excel(r'C:\Users\yvesw\Codes\Web_GUI\1000_1000_paths.xlsx')
+        thenThousandPaths =  quantifyMonteCarloNoise(10000, 100)
+        pd.DataFrame(thenThousandPaths).to_excel(r'C:\Users\yvesw\Codes\Web_GUI\10000_100_paths.xlsx')
+        hundredThousandPaths =  quantifyMonteCarloNoise(100000, 100)
+        pd.DataFrame(hundredThousandPaths).to_excel(r'C:\Users\yvesw\Codes\Web_GUI\100000_100_paths.xlsx')
+        millonPaths =  quantifyMonteCarloNoise(1000000, 100)
+        pd.DataFrame(millonPaths).to_excel(r'C:\Users\yvesw\Codes\Web_GUI\1000000_100_paths.xlsx')
