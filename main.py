@@ -10,8 +10,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-
 import bingo_game as bg
+import scipy.stats as scStat
 
 # from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
@@ -28,12 +28,21 @@ def addPlayersNumbers(dataFrame):
     return outListOfList
 
 
+def obtainZscores(alpha):
+    return scStat.norm.ppf(alpha)
 
+def bernoulliInterval(sampleEstimate, alpha, numberOfDraws):
+    lowerZscore = obtainZscores(alpha/2)
+    upperZscore = obtainZscores(1-alpha/2)
+    
+    lowerBound = sampleEstimate + lowerZscore*np.sqrt((sampleEstimate*(1-sampleEstimate))/numberOfDraws)
+    upperBound = sampleEstimate + upperZscore*np.sqrt((sampleEstimate*(1-sampleEstimate))/numberOfDraws)
+    
+    return lowerBound, upperBound
+    
 
 header = st.container()
 playerContainer = st.container()
-# playerOneContainer = st.container()
-# playerTwoContainer = st.container()
 
 gameInterFace = st.container()
 
@@ -49,10 +58,15 @@ with st.sidebar:
     # randomSeed = st.number_input('Random Seed', min_value=0, max_value=9999999999, value = int(), step = 1)
     numberOfPaths = st.radio(
         "Number of Paths",
-        (100, 1000, 10000, 100000, 1000000)
+        (100, 1000, 10000, 100000)
     )
     
     drawnNumbers = st.multiselect('Already Drawn',np.arange(1,100))
+    
+    confidenceLevel = st.radio(
+        "Confidence Level",
+        (0.99, 0.95, 0.90)
+    )
     
     
 def hihglightSelected(cell_value):
@@ -106,18 +120,26 @@ with gameInterFace:
         if True:
             gameToPlay.playBulk()
             
-            playerOneWins = gameToPlay.winnerList.count('')
+            playerOneWins = gameToPlay.winnerList.count('Player One')
             playerTwoWins = gameToPlay.winnerList.count('Player Two')
             draws = gameToPlay.winnerList.count('Draw')
             
             playerOneWinsPercentage = playerOneWins/numberOfPaths*100
             playerTwoWinsPercentage = playerTwoWins/numberOfPaths*100
             drawsPercentage =  draws/numberOfPaths*100
+                        
+            playerOneConfidenceInterval = bernoulliInterval(playerOneWinsPercentage/100, 1-confidenceLevel, numberOfPaths)
+            playerTwoConfidenceInterval = bernoulliInterval(playerTwoWinsPercentage/100, 1-confidenceLevel, numberOfPaths)
+                        
             
             st.text('Ran with ' + str(numberOfPaths) + " Paths")
             st.text('Ran with' + str(drawnNumbers) + " already drawn")
-            st.text('Player one Won ' + str(playerOneWins) +" (" + str(playerOneWinsPercentage) + "%)" + ' Games')
-            st.text('Player two  Won ' + str(playerTwoWins) +" (" + str(playerTwoWinsPercentage) + "%)"  + ' Games')
+            st.text('Player one Won ' + str(playerOneWins) +" (" + str(round(playerOneWinsPercentage,2)) + "%)" + ' Games')
+            
+            st.text('Player one ' + str(round((confidenceLevel)*100,2)) + ' % confidence Interval ' + str(round(playerOneConfidenceInterval[0]*100,2)) + "%" + " to " + str(round(playerOneConfidenceInterval[1]*100,2)) + "%" )
+                    
+            st.text('Player two  Won ' + str(playerTwoWins) +" (" + str(round(playerTwoWinsPercentage,2)) + "%)"  + ' Games')
+            st.text('Player two ' + str(round((confidenceLevel)*100,2)) + ' % confidence Interval ' + str(round(playerTwoConfidenceInterval[0]*100,2)) + "%" +" to " + str(round(playerTwoConfidenceInterval[1]*100,2)) + "%")
             st.text('Number of draws ' + str(draws) +" (" + str(drawsPercentage) + "%)" + ' Games')
             summaryFrame = pd.DataFrame([[playerOneWinsPercentage, playerTwoWinsPercentage, drawsPercentage]],
                                         columns = ['Player One %', 'Player Two %', 'Draws %'])
@@ -126,111 +148,10 @@ with gameInterFace:
             st.bar_chart(summaryFrame.transpose())
             # st.text(gameToPlay.winnerList)
             gameDF = gameToPlay.summariseResults()
-            st.dataframe(gameDF)
+            st.dataframe(gameDF.head(100))
         
         csv = convert_df_to_csv(gameDF)
         
         st.download_button('Download Summary', data =csv, file_name='Summary Bingo Results.csv', mime = 'text/csv', )
         
 
-# import pandas as pd
-
-# df = pd.DataFrame({
-#     "name":         ["alan","beth","charlie","david", "edward"],
-#     "age" :         [34,    12,     43,      32,      77],
-#     "num_children": [1,     0,      2,       1,       6],
-#     "num_pets":     [1,     0,      1,       2,       0],
-#     "bank_balance": [100.0, 10.0,   -10.0,   30.0,    30.0]})
-
-# def even_number_background(cell_value):
-
-#     highlight = 'background-color: darkorange;'
-#     default = ''
-
-#     if type(cell_value) in [float, int]:
-#         if cell_value in drawnNumbers:
-#             return highlight
-#     return default
-
-
-    
-# st.dataframe(df.style.applymap(even_number_background))
-    
-    
-# st.dataframe(data)
-if False:
-    gb = GridOptionsBuilder.from_dataframe(data)
-    
-    grid_response = AgGrid(
-        data,
-        editable = True,
-        reload_data = True,
-        data_return_mode=DataReturnMode.AS_INPUT,
-        update_mode = GridUpdateMode.MANUAL, 
-        key = 'NumeroUno'
-    )
-    
-    dataTwo = grid_response['data']
-    
-    dataTwo = pd.DataFrame(dataTwo)
-    dataTwo.to_excel(workPath, 'Input', index=False)
-
-# data = pd.read_excel(workPath, 'Input')
-
-
-# st.dataframe(data)
-
-# grid_response_Two = AgGrid(
-#     dataTwo,
-#     editable = True,
-#     reload_data = True,
-#     data_return_mode=DataReturnMode.AS_INPUT,
-#     update_mode = GridUpdateMode.MANUAL ,
-#     key = 'NumberTwo'
-
-# )
-
-# data = grid_response['data']
-# selected = grid_response['selected_rows'] 
-# df = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
-    
-# import streamlit as st
-# from st_aggrid import GridOptionsBuilder, AgGrid
-# from st_aggrid.shared import GridUpdateMode, DataReturnMode
-# import pandas as pd
-
-# vpth = “your path” # path that contains the csv file
-# csvfl = “tst.csv” # I used a small csv file containing 2 columns: Name & Amt
-# tdf = pd.read_csv(vpth + csvfl) # load csv into dataframe
-
-# gb = GridOptionsBuilder.from_dataframe(data)
-# gb.configure_column(“Name”, header_name=(“F Name”), editable=True)
-# gb.configure_column(“Amt”, header_name=(“Amount”), editable=True, type=[“numericColumn”,“numberColumnFilter”,“customNumericFormat”], precision=0)
-
-# gridOptions = gb.build()
-# dta = AgGrid(data,
-# gridOptions=gridOptions,
-# reload_data=False,
-# height=200,
-# editable=True,
-# theme="streamlit",
-# data_return_mode=DataReturnMode.AS_INPUT,
-# update_mode=GridUpdateMode.MODEL_CHANGED)
-
-# st.write("Please change an amount to test this")
-
-# if st.button("Iterate through aggrid dataset"):
-#     for i in range(len(dta['data'])): # or you can use for i in range(tdf.shape[0]):
-#         st.caption(f"df line: {tdf.loc[i][0]} | {tdf.loc[i][1]} || AgGrid line: {dta[‘data’][‘Name’][i]} | {dta[‘data’][‘Amt’][i]}")
-    
-#         # check if any change has been done to any cell in any col by writing a caption out
-#         if tdf.loc[i]['Name'] != dta['data']['Name'][i]:
-#             st.caption(f"Name column data changed from {tdf.loc[i]['Name']} to {dta['data']['Name'][i]}...")
-#             # consequently, you can write changes to a database if/as required
-    
-#         if tdf.loc[i]['Amt'] != dta['data']['Amt'][i]:
-#             st.caption(f"Amt column data changed from {tdf.loc[i]['Amt']} to {dta['data']['Amt'][i]}...")
-
-# tdf = dta['data']    # overwrite df with revised aggrid data; complete dataset at one go
-# tdf.to_csv(vpth + 'file1.csv', index=False)  # re/write changed data to CSV if/as required
-# st.dataframe(tdf)    # confirm changes to df
