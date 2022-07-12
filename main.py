@@ -46,7 +46,13 @@ playerContainer = st.container()
 
 gameInterFace = st.container()
 
-    
+def castListToInt(textList):
+    outList = []
+    for element in textList:
+        outList.append(int(element))
+        
+    return outList
+        
 
 with header:
     st.title('Welcome to my GUI')
@@ -89,6 +95,13 @@ with playerContainer:
     c1, c2 = st.columns(2)
     with c1:
         st.header('Player One')
+        firstRow = st.text_input("1st Row P1")
+        secondRow = st.text_input("2nd Row P1")
+        thirdRow = st.text_input("3rd Row P1")
+        fourthRow = st.text_input("4th Row P1")
+        fifthRow = st.text_input("5th Row P1")
+        
+
         # playerOneData.applymap(hihglightSelected)
         # st.dataframe(playerOneData)
         if inputFile is not None:
@@ -96,9 +109,37 @@ with playerContainer:
             st.dataframe(playerOneData.style.applymap(hihglightSelected))
     with c2:
         st.header('Player Two')
+        firstRowPlayerTwo = st.text_input("1st Row P2")
+        secondRowPlayerTwo = st.text_input("2nd Row P2")
+        thirdRowPlayerTwo = st.text_input("3rd Row P2")
+        fourthRowPlayerTwo = st.text_input("4th Row P2")
+        fifthRowPlayerTwo = st.text_input("5th Row P2")
+        # if st.button('Load from List', key = 'Player Two'):
+            
         # playerTwoData.applymap(hihglightSelected)
         if inputFile is not None:
             playerTwoData = pd.read_excel(inputFile, 'PlayerTwo')
+            st.dataframe(playerTwoData.style.applymap(hihglightSelected))
+            
+    if st.checkbox('Load from List', key='Player One'):
+        with c1:
+            playerOneData = pd.DataFrame([
+                castListToInt(firstRow.split(',')),
+                castListToInt(secondRow.split(',')),
+                castListToInt(thirdRow.split(',')),
+                castListToInt(fourthRow.split(',')),
+                castListToInt(fifthRow.split(','))
+                ], columns=['One', 'Two', 'Three', 'Four','Five'])
+            st.dataframe(playerOneData.style.applymap(hihglightSelected))
+        
+        with c2:    
+            playerTwoData = pd.DataFrame([
+                castListToInt(firstRowPlayerTwo.split(',')),
+                castListToInt(secondRowPlayerTwo.split(',')),
+                castListToInt(thirdRowPlayerTwo.split(',')),
+                castListToInt(fourthRowPlayerTwo.split(',')),
+                castListToInt(fifthRowPlayerTwo.split(','))
+                ], columns=['One', 'Two', 'Three', 'Four','Five'])
             st.dataframe(playerTwoData.style.applymap(hihglightSelected))
     
 
