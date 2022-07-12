@@ -109,10 +109,10 @@ with playerContainer:
         
     with c2:
         st.header('Player Two')
-        firstRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(26,31))
-        secondRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(31,36))
-        thirdRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(36,41))
-        fourthRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(41,46))
+        firstRowPlayerTwo = st.multiselect('1st Row P2', available, np.arange(26,31))
+        secondRowPlayerTwo = st.multiselect('2nd Row P2', available, np.arange(31,36))
+        thirdRowPlayerTwo = st.multiselect('3rd Row P2', available, np.arange(36,41))
+        fourthRowPlayerTwo = st.multiselect('4th Row P2', available, np.arange(41,46))
         fifthRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(46,51))
         # if st.button('Load from List', key = 'Player Two'):
             
