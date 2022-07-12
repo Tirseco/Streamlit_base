@@ -95,52 +95,62 @@ with playerContainer:
     c1, c2 = st.columns(2)
     with c1:
         st.header('Player One')
-        firstRow = st.text_input("1st Row P1")
-        secondRow = st.text_input("2nd Row P1")
-        thirdRow = st.text_input("3rd Row P1")
-        fourthRow = st.text_input("4th Row P1")
-        fifthRow = st.text_input("5th Row P1")
+        available = np.arange(1,100)
+        firstRow = st.multiselect('1st Row P1', available, np.arange(1,6))
+        # available = availableList = list(set(available) - set(firstRow))
+        secondRow = st.multiselect('2nd Row P1', available, np.arange(6,11))
+        thirdRow = st.multiselect('3rd Row P1', available, np.arange(11,16))
+        fourthRow = st.multiselect('4th Row P1', available, np.arange(16,21))
+        fifthRow = st.multiselect('5th Row P1', available, np.arange(21,26))
         
 
         # playerOneData.applymap(hihglightSelected)
         # st.dataframe(playerOneData)
-        if inputFile is not None:
-            playerOneData = pd.read_excel(inputFile, 'PlayerOne')
-            st.dataframe(playerOneData.style.applymap(hihglightSelected))
+        
     with c2:
         st.header('Player Two')
-        firstRowPlayerTwo = st.text_input("1st Row P2")
-        secondRowPlayerTwo = st.text_input("2nd Row P2")
-        thirdRowPlayerTwo = st.text_input("3rd Row P2")
-        fourthRowPlayerTwo = st.text_input("4th Row P2")
-        fifthRowPlayerTwo = st.text_input("5th Row P2")
+        firstRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(26,31))
+        secondRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(31,36))
+        thirdRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(36,41))
+        fourthRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(41,46))
+        fifthRowPlayerTwo = st.multiselect('5th Row P2', available, np.arange(46,51))
         # if st.button('Load from List', key = 'Player Two'):
             
-        # playerTwoData.applymap(hihglightSelected)
-        if inputFile is not None:
-            playerTwoData = pd.read_excel(inputFile, 'PlayerTwo')
-            st.dataframe(playerTwoData.style.applymap(hihglightSelected))
+        
             
-    if st.checkbox('Load from List', key='Player One'):
+    loadingCheckBox = st.checkbox('Load from List', key='Player One')        
+    if loadingCheckBox:
         with c1:
             playerOneData = pd.DataFrame([
-                castListToInt(firstRow.split(',')),
-                castListToInt(secondRow.split(',')),
-                castListToInt(thirdRow.split(',')),
-                castListToInt(fourthRow.split(',')),
-                castListToInt(fifthRow.split(','))
+                firstRow,
+                secondRow,
+                thirdRow,
+                fourthRow,
+                fifthRow
                 ], columns=['One', 'Two', 'Three', 'Four','Five'])
-            st.dataframe(playerOneData.style.applymap(hihglightSelected))
+            playerOneFrame = st.dataframe(playerOneData.style.applymap(hihglightSelected))
         
         with c2:    
             playerTwoData = pd.DataFrame([
-                castListToInt(firstRowPlayerTwo.split(',')),
-                castListToInt(secondRowPlayerTwo.split(',')),
-                castListToInt(thirdRowPlayerTwo.split(',')),
-                castListToInt(fourthRowPlayerTwo.split(',')),
-                castListToInt(fifthRowPlayerTwo.split(','))
+                firstRowPlayerTwo,
+                secondRowPlayerTwo,
+                thirdRowPlayerTwo,
+                fourthRowPlayerTwo,
+                fifthRowPlayerTwo
                 ], columns=['One', 'Two', 'Three', 'Four','Five'])
-            st.dataframe(playerTwoData.style.applymap(hihglightSelected))
+            playerTwoFrame = st.dataframe(playerTwoData.style.applymap(hihglightSelected))
+            
+    # playerTwoData.applymap(hihglightSelected)
+    with c1:
+        if inputFile is not None and loadingCheckBox==False:
+            loadingCheckBox = False
+            playerTwoData = pd.read_excel(inputFile, 'PlayerTwo')
+            playerTwoFrame = st.dataframe(playerTwoData.style.applymap(hihglightSelected))
+    
+    with c2:    
+        if inputFile is not None and loadingCheckBox==False:
+                playerOneData = pd.read_excel(inputFile, 'PlayerOne')
+                playerOneFrame = st.dataframe(playerOneData.style.applymap(hihglightSelected))
     
 
 # with playerOneContainer:
